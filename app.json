@@ -1,0 +1,30 @@
+{
+  "expo": {
+    "name": "Konnek",
+    "slug": "konnek-loyalty",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "konnek",
+    "userInterfaceStyle": "light",
+    "android": {
+      "package": "com.konnek.loyalty",
+      "permissions": [
+        "android.permission.NFC"
+      ]
+    },
+    "plugins": [
+      "expo-router",
+      "react-native-nfc-manager",
+      "expo-font"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "33af2147-79ab-47d4-908c-380ab4a34bf5"
+      }
+    }
+  }
+}
