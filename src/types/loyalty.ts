@@ -1,29 +1,109 @@
 export type Customer = {
   id: string
+
   firstName: string
   lastName: string
-  email?: string
-  phone?: string
-  nfcCardId: string
+
+  email: string
+  phone: string
+
+  /*
+   * Optional because customers
+   * can register without an NFC card.
+   */
+  nfcCardId?: string
+
   totalPoints: number
+  availablePoints: number
   timesEarned: number
   totalRedeemed: number
+
   createdAt: string
   color: string
 }
 
-export type Screen = 'dashboard' | 'customers' | 'profile'
-export type NFCMode = 'idle' | 'create' | 'reward'
-export type NFCState = 'waiting' | 'reading' | 'error'
-export type NewCustomer = Omit<Customer, 'id' | 'nfcCardId' | 'totalPoints' | 'timesEarned' | 'totalRedeemed' | 'createdAt' | 'color'>
+export type Screen =
+  | 'dashboard'
+  | 'customers'
+  | 'rewards'
 
-export const POINTS_PER_AMOUNT = 100
+export type NFCMode =
+  | 'idle'
 
-export const getAvailablePoints = (customer: Customer) => Math.max(0, customer.totalPoints - customer.totalRedeemed)
+  /*
+   * Background NFC.
+   *
+   * Known card:
+   * open points modal.
+   *
+   * Unknown card:
+   * open registration.
+   */
+  | 'identify'
 
-export const initialCustomers: Customer[] = [
-  { id: '1', firstName: 'Maya', lastName: 'Thompson', nfcCardId: '04A1...', totalPoints: 2840, timesEarned: 18, totalRedeemed: 1200, createdAt: 'Aug 24, 2026', color: '#F28C70' },
-  { id: '2', firstName: 'Ethan', lastName: 'Martinez', nfcCardId: '04B2...', totalPoints: 1560, timesEarned: 11, totalRedeemed: 600, createdAt: 'Aug 19, 2026', color: '#B9E8EB' },
-  { id: '3', firstName: 'Sofia', lastName: 'Williams', nfcCardId: '04C3...', totalPoints: 980, timesEarned: 7, totalRedeemed: 400, createdAt: 'Aug 12, 2026', color: '#F7D98B' },
-  { id: '4', firstName: 'Noah', lastName: 'Anderson', nfcCardId: '04D4...', totalPoints: 740, timesEarned: 5, totalRedeemed: 200, createdAt: 'Jul 30, 2026', color: '#C8B5ED' },
-]
+  /*
+   * Redeem reward using NFC.
+   */
+  | 'redeem'
+
+  /*
+   * Link / replace customer card.
+   */
+  | 'link'
+
+export type NFCState =
+  | 'idle'
+  | 'waiting'
+  | 'reading'
+  | 'detected'
+  | 'error'
+
+export const getAvailablePoints = (
+  customer: Customer
+) => {
+  return Math.max(0, customer.availablePoints)
+}
+
+// Preview only. The server awards the final points using decimal arithmetic.
+export const estimatePurchasePoints = (amount: number, amountPerPoint: number) => {
+  if (!Number.isFinite(amount) || !Number.isFinite(amountPerPoint) || amount < 0 || amountPerPoint <= 0) return 0
+  const amountCents = Math.round(amount * 100)
+  const rateCents = Math.round(amountPerPoint * 100)
+  return rateCents > 0 ? Math.round(amountCents * 100 / rateCents) / 100 : 0
+}
+
+export const normalizePhone = (
+  phone: string
+) => {
+  let digits =
+    phone.replace(/\D/g, '')
+
+  /*
+   * 09171234567
+   * ->
+   * 639171234567
+   */
+  if (
+    digits.length === 11 &&
+    digits.startsWith('09')
+  ) {
+    digits =
+      `63${digits.substring(1)}`
+  }
+
+  /*
+   * 9171234567
+   * ->
+   * 639171234567
+   */
+  if (
+    digits.length === 10 &&
+    digits.startsWith('9')
+  ) {
+    digits =
+      `63${digits}`
+  }
+
+  return digits
+}
+

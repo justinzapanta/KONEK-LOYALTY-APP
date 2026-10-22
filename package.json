@@ -4,19 +4,27 @@
   "private": true,
   "main": "node_modules/expo/AppEntry.js",
   "scripts": {
+    "postinstall": "node scripts/fix-camera-preview.cjs",
     "start": "expo start",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
     "web": "expo start --web",
-    "typecheck": "tsc --noEmit"
+    "api:url": "node scripts/set-api-url.cjs",
+    "icons:sync": "node scripts/sync-android-icons.cjs",
+    "typecheck": "tsc --noEmit",
+    "test": "node --test tests/api.test.cjs tests/release-security.test.cjs tests/nfc-loading.test.cjs tests/claim-scanner.test.cjs tests/native-reward-scanner.test.cjs tests/checkout.test.cjs tests/pending-checkout.test.cjs tests/workspace-cache.test.cjs tests/app-performance.test.cjs tests/pos-checkout.test.cjs"
   },
   "dependencies": {
     "@expo/vector-icons": "15.1.1",
+    "@supabase/supabase-js": "^2.118.0",
     "expo": "57.0.26",
+    "expo-camera": "57.0.6",
     "expo-constants": "~57.0.20",
+    "expo-crypto": "~57.0.3",
     "expo-font": "~57.0.4",
     "expo-linking": "~57.0.11",
     "expo-router": "57.0.24",
+    "expo-secure-store": "~57.0.4",
     "expo-status-bar": "57.0.1",
     "react": "19.2.3",
     "react-dom": "19.2.3",
@@ -28,8 +36,18 @@
     "react-native-screens": "4.26.2",
     "react-native-worklets": "0.10.1"
   },
+  "expo": {
+    "autolinking": {
+      "android": {
+        "buildFromSource": [
+          "expo-camera"
+        ]
+      }
+    }
+  },
   "devDependencies": {
     "@types/react": "19.2.18",
+    "sharp": "0.35.5",
     "typescript": "6.0.3"
   }
 }

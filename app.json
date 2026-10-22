@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Konnek",
+    "name": "KONEK",
     "slug": "konnek-loyalty",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -8,14 +8,44 @@
     "userInterfaceStyle": "light",
     "android": {
       "package": "com.konnek.loyalty",
+      "softwareKeyboardLayoutMode": "resize",
       "permissions": [
-        "android.permission.NFC"
+        "android.permission.NFC",
+        "android.permission.CAMERA"
+      ],
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#081711"
+      },
+      "allowBackup": false,
+      "blockedPermissions": [
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.SYSTEM_ALERT_WINDOW",
+        "android.permission.RECORD_AUDIO"
       ]
     },
     "plugins": [
       "expo-router",
       "react-native-nfc-manager",
-      "expo-font"
+      "expo-font",
+      "expo-secure-store",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow KONEK to scan customer reward QR codes.",
+          "microphonePermission": false,
+          "recordAudioAndroid": false,
+          "barcodeScannerEnabled": true
+        }
+      ],
+      [
+        "./plugins/with-api-network.cjs",
+        {
+          "allowCleartext": false
+        }
+      ],
+      "./plugins/with-release-security.cjs"
     ],
     "experiments": {
       "typedRoutes": true
@@ -23,8 +53,14 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "33af2147-79ab-47d4-908c-380ab4a34bf5"
+        "projectId": "fe0d7aa0-cb67-4209-9160-c2a36727c62e"
       }
+    },
+    "icon": "./assets/icon.png",
+    "web": {
+      "name": "KONEK",
+      "shortName": "KONEK",
+      "favicon": "./public/icon-light-32x32.png"
     }
   }
 }

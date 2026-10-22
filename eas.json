@@ -1,0 +1,42 @@
+{
+  "cli": {
+    "version": ">= 24.8.0",
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "development": {
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://konekdigital.vercel.app"
+      },
+      "developmentClient": true,
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      }
+    },
+    "preview": {
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://konekdigital.vercel.app"
+      },
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      }
+    },
+    "production": {
+      "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://konekdigital.vercel.app"
+      },
+      "autoIncrement": true,
+      "android": {
+        "buildType": "apk"
+      },
+      "developmentClient": false,
+      "credentialsSource": "remote"
+    }
+  },
+  "submit": {
+    "production": {}
+  }
+}

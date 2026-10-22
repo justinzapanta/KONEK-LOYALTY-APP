@@ -1,6 +1,6 @@
 import { StyleSheet } from 'react-native'
 
-export const colors = { cream: '#F7F4EC', ink: '#061B16', green: '#35D978', muted: '#6C7B76', line: '#D5E1DA', dark: '#12483D', white: '#FFFDF7' } as const
+export const colors = { cream: '#F8F5EC', ink: '#081711', green: '#3AD875', muted: '#6C7B76', line: '#D5E1DA', dark: '#12483D', white: '#FFFDF7' } as const
 
 export const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.cream },
