@@ -16,9 +16,9 @@ let legacyBranch=false
 let workspaceGeneration=0
 export function setWorkspaceBusinessId(id: string, userId?: string) { if(businessId!==id){branchId=null;workspaceGeneration++} businessId = id; staffId = userId ?? null }
 export function setWorkspaceBranchId(id:string|null,isLegacyBranch=false){legacyBranch=isLegacyBranch;if(branchId!==id){branchId=id;workspaceGeneration++}}
-export function getLegacyWorkspaceStorageScope(){return legacyBranch&&businessId&&staffId?`${baseUrl()}:${businessId}:${staffId}`:null}
-export function getWorkspaceStorageScope() { if (!businessId || !staffId) throw new Error('Reload your workspace before recording a purchase.'); return `${baseUrl()}:${businessId}:${staffId}:${branchId??'main'}` }
-export function getCheckoutStorageScope() { if (!businessId || !staffId || !branchId) throw new Error('Load your working branch before pairing a checkout.'); return `${baseUrl()}:${businessId}:${branchId}` }
+export function getLegacyWorkspaceStorageScope(){return legacyBranch&&businessId&&staffId?`${storageOrigin()}:${businessId}:${staffId}`:null}
+export function getWorkspaceStorageScope() { if (!businessId || !staffId) throw new Error('Reload your workspace before recording a purchase.'); return `${storageOrigin()}:${businessId}:${staffId}:${branchId??'main'}` }
+export function getCheckoutStorageScope() { if (!businessId || !staffId || !branchId) throw new Error('Load your working branch before pairing a checkout.'); return `${storageOrigin()}:${businessId}:${branchId}` }
 let session: Session | null = null
 let generation = 0
 let refreshing: Promise<void> | null = null
@@ -27,6 +27,12 @@ const baseUrl = () => {
   const value = process.env.EXPO_PUBLIC_API_URL?.trim().replace(/\/$/, '')
   if (!value || !/^https?:\/\//.test(value)) throw new Error('Set EXPO_PUBLIC_API_URL to your KONEK website URL and restart Expo.')
   return value
+}
+// Keep production's existing encrypted cache, pending checkout and counter binding keys.
+// This legacy namespace is local storage only: every network request uses baseUrl().
+const storageOrigin = () => {
+  const origin = baseUrl()
+  return origin === 'https://konekdigital.com' ? 'https://konekdigital.vercel.app' : origin
 }
 const save = async () => {
   // Web previews keep tokens in memory. Native builds use Keychain/Keystore.
@@ -72,7 +78,7 @@ async function refresh() {
 }
 export const auth = {
   async realtimeToken() { if (!session) throw new ApiError(401, 'Sign in to continue.'); if (session.expires_at * 1000 <= Date.now() + 60000) await refresh(); return session!.access_token },
-  cacheScope() { return session?.user_id ? `${baseUrl()}:${session.user_id}` : null },
+  cacheScope() { return session?.user_id ? `${storageOrigin()}:${session.user_id}` : null },
   async bindUser(id: string) { if (session && session.user_id !== id) { session.user_id = id; await save() } },
   onExpired(callback: () => void) { expired = callback; return () => { expired = undefined } },
   async restore(options?: { deferRefresh?: boolean }) {

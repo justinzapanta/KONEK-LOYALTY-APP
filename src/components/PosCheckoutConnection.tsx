@@ -25,6 +25,9 @@ import {
 } from "../services/pos-checkout";
 import { scanRewardCode } from "../services/nativeRewardScanner";
 export function PosCheckoutConnection({
+  setupRequested = false,
+  onSetupHandled,
+  showQueue = true,
   selectedId,
   onSelect,
   onClear,
@@ -34,6 +37,9 @@ export function PosCheckoutConnection({
   onPairRequestHandled,
   paused = false,
 }: {
+  setupRequested?: boolean;
+  onSetupHandled?: () => void;
+  showQueue?: boolean;
   selectedId?: string;
   onSelect: (purchase: PosPurchase) => void;
   onClear: () => void;
@@ -60,6 +66,12 @@ export function PosCheckoutConnection({
     realtime = useRef<SupabaseClient | null>(null),
     debounce = useRef<ReturnType<typeof setTimeout> | null>(null);
   const scanLock = useRef(false);
+  useEffect(() => {
+    if (!setupRequested || paused) return;
+    setError("");
+    setPairOpen(true);
+    onSetupHandled?.();
+  }, [setupRequested, paused, onSetupHandled]);
   useEffect(() => {
     // An app link only pre-fills the form. Sign-in, branch checks and explicit
     // confirmation still happen before the existing authenticated pair request.
@@ -238,100 +250,87 @@ export function PosCheckoutConnection({
     }
   }
   return (
-    <View style={s.card}>
-      <View style={s.heading}>
-        <View style={{ flex: 1 }}>
-          <Text style={s.title}>
-            {binding ? binding.name : "Connect to a counter"}
-          </Text>
-          <Text style={s.muted}>
-            {binding
-              ? binding.branch_name + " · Only this counter’s purchases"
-              : "Enter the same counter code used in your POS to receive its paid purchases."}
-          </Text>
-        </View>
-        <Pressable
-          disabled={paused || !!pending}
-          accessibilityRole="button"
-          onPress={() => {
-            setError("");
-            setPairOpen(true);
-          }}
-          style={s.smallButton}
-        >
-          <Text style={s.action}>
-            {binding ? "Change counter" : "Connect phone"}
-          </Text>
-        </Pressable>
-      </View>
-      {binding && (
-        <>
-          {!!(counterCode || binding.counter_code) && (
-            <Text selectable style={s.counterCode}>
-              Counter code: {counterCode || binding.counter_code}
-            </Text>
-          )}
-          <Text style={s.muted}>
-            {notice || "Checking this counter’s purchases…"}
-          </Text>
-          {!rows.length && (
-            <Text style={s.muted}>
-              Waiting for the next paid purchase from this counter.
-            </Text>
-          )}
-          {rows.slice(0, 5).map((row) => (
-            <Pressable
-              key={row.id}
-              disabled={paused || !!pending}
-              onPress={() => onSelect(row)}
-              style={[s.purchase, selectedId === row.id && s.selected]}
-              accessibilityRole="button"
-            >
-              <Text style={s.title}>
-                {new Intl.NumberFormat(undefined, {
-                  style: "currency",
-                  currency,
-                }).format(Number(row.total_paid))}
-                {selectedId === row.id ? " · Selected" : ""}
-              </Text>
-              <Text style={s.muted}>
-                {new Date(row.paid_at).toLocaleTimeString()} ·{" "}
-                {selectedId === row.id
-                  ? "Tap the customer’s NFC card or use Give points by phone."
-                  : "Select this purchase to identify the customer."}
-              </Text>
-            </Pressable>
-          ))}
-          {rows.length > 5 && (
-            <Text style={s.muted}>
-              Showing the first 5 waiting purchases. Complete one to see the
-              next.
-            </Text>
-          )}
+    <>
+      {binding && showQueue && (
+        <View style={s.card}>
           <View style={s.heading}>
-            <Pressable
-              onPress={() => refreshRef.current?.()}
-              disabled={!!pending}
-              accessibilityRole="button"
-            >
-              <Text style={s.action}>Refresh purchases</Text>
-            </Pressable>
-            {selectedId && (
-              <Pressable
-                onPress={onClear}
-                disabled={paused}
-                accessibilityRole="button"
-              >
-                <Text style={s.action}>Clear selection</Text>
-              </Pressable>
-            )}
+            <View style={{ flex: 1, gap: 4 }}>
+              <Text style={s.title}>Purchases from {binding.name}</Text>
+              <Text style={s.muted}>
+                {binding.branch_name} · Manage this connection in My account.
+              </Text>
+            </View>
           </View>
-        </>
-      )}
-      {!!error && !pairOpen && (
-        <Text style={s.error} accessibilityRole="alert">
-          {error}
-        </Text>
+          {binding && (
+            <>
+              {!!(counterCode || binding.counter_code) && (
+                <Text selectable style={s.counterCode}>
+                  Counter code: {counterCode || binding.counter_code}
+                </Text>
+              )}
+              <Text style={s.muted}>
+                {notice || "Checking this counter’s purchases…"}
+              </Text>
+              {!rows.length && (
+                <Text style={s.muted}>
+                  Waiting for the next paid purchase from this counter.
+                </Text>
+              )}
+              {rows.slice(0, 5).map((row) => (
+                <Pressable
+                  key={row.id}
+                  disabled={paused || !!pending}
+                  onPress={() => onSelect(row)}
+                  style={[s.purchase, selectedId === row.id && s.selected]}
+                  accessibilityRole="button"
+                >
+                  <Text style={s.title}>
+                    {new Intl.NumberFormat(undefined, {
+                      style: "currency",
+                      currency,
+                    }).format(Number(row.total_paid))}
+                    {selectedId === row.id ? " · Selected" : ""}
+                  </Text>
+                  <Text style={s.muted}>
+                    {new Date(row.paid_at).toLocaleTimeString()} ·{" "}
+                    {selectedId === row.id
+                      ? "Tap the customer’s NFC card or use Give points by phone."
+                      : "Select this purchase to identify the customer."}
+                  </Text>
+                </Pressable>
+              ))}
+              {rows.length > 5 && (
+                <Text style={s.muted}>
+                  Showing the first 5 waiting purchases. Complete one to see the
+                  next.
+                </Text>
+              )}
+              <View style={s.heading}>
+                <Pressable
+                  onPress={() => refreshRef.current?.()}
+                  disabled={!!pending}
+                  accessibilityRole="button"
+                >
+                  <Text style={s.action}>Refresh purchases</Text>
+                </Pressable>
+                {selectedId && (
+                  <Pressable
+                    onPress={onClear}
+                    disabled={paused}
+                    accessibilityRole="button"
+                  >
+                    <Text style={s.action}>Clear selection</Text>
+                  </Pressable>
+                )}
+              </View>
+            </>
+          )}
+          {!!error && !pairOpen && (
+            <Text style={s.error} accessibilityRole="alert">
+              {error}
+            </Text>
+          )}
+        </View>
       )}
       <Modal
         visible={pairOpen}
@@ -345,10 +344,27 @@ export function PosCheckoutConnection({
         >
           <View style={s.modal}>
             <ScrollView
+              showsVerticalScrollIndicator={true}
+              persistentScrollbar
+              indicatorStyle="black"
               keyboardShouldPersistTaps="handled"
               contentContainerStyle={{ gap: 14, padding: 22 }}
             >
-              <Text style={s.title}>Connect to a counter</Text>
+              <Text style={s.title}>
+                {binding ? "Counter connection" : "Connect to a counter"}
+              </Text>
+              {!!binding && (
+                <View style={s.guide}>
+                  <Text style={s.title}>Connected to {binding.name}</Text>
+                  <Text style={s.muted}>
+                    {binding.branch_name} · This phone receives purchases from
+                    this counter.
+                  </Text>
+                  <Text style={s.muted}>
+                    To change counters, enter the new counter’s code below.
+                  </Text>
+                </View>
+              )}
               <View style={s.guide}>
                 <Text style={s.title}>
                   Your branch:{" "}
@@ -438,13 +454,13 @@ export function PosCheckoutConnection({
                 onPress={close}
                 style={s.smallButton}
               >
-                <Text style={s.action}>Cancel</Text>
+                <Text style={s.action}>{binding ? "Done" : "Cancel"}</Text>
               </Pressable>
             </ScrollView>
           </View>
         </KeyboardAvoidingView>
       </Modal>
-    </View>
+    </>
   );
 }
 const s = StyleSheet.create({

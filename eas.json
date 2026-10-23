@@ -6,7 +6,7 @@
   "build": {
     "development": {
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://konekdigital.vercel.app"
+        "EXPO_PUBLIC_API_URL": "https://konekdigital.com"
       },
       "developmentClient": true,
       "distribution": "internal",
@@ -16,7 +16,7 @@
     },
     "preview": {
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://konekdigital.vercel.app"
+        "EXPO_PUBLIC_API_URL": "https://konekdigital.com"
       },
       "distribution": "internal",
       "android": {
@@ -26,7 +26,7 @@
     "production": {
       "distribution": "internal",
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://konekdigital.vercel.app"
+        "EXPO_PUBLIC_API_URL": "https://konekdigital.com"
       },
       "autoIncrement": true,
       "android": {

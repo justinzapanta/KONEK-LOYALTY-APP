@@ -2,7 +2,7 @@
 
 ## Current hosted API
 
-The app now connects to `https://konekdigital.vercel.app`. This address is set in `.env.local` and every EAS build profile in `eas.json`. Android cleartext HTTP access is disabled for this HTTPS backend. The phone can use Wi-Fi or mobile data; the local PC server is no longer required for this configuration.
+The app now connects to `https://konekdigital.com`. This address is set in `.env.local` and every EAS build profile in `eas.json`. Android cleartext HTTP access is disabled for this HTTPS backend. The phone can use Wi-Fi or mobile data; the local PC server is no longer required for this configuration.
 
 Restart development with `npm start -- --clear`. An installed APK must be rebuilt and reinstalled to use this URL, for example `npx eas-cli build --platform android --profile preview`.
 
@@ -36,7 +36,7 @@ For a standalone Android APK to test NFC on your phone, run from the app folder:
 npx eas-cli build --platform android --profile preview --clear-cache
 ```
 
-Install the newly built APK. Keep the website running on the computer and connect the phone to the same Wi-Fi. The temporary backend is `http://192.168.254.198:3000`; a cloud build can embed that address, but the installed phone still needs LAN access to the computer. NFC testing uses the native APK, not Expo Go.
+Install the newly built APK. With the production backend `https://konekdigital.com`, the phone can use Wi-Fi or mobile data. Only a local LAN backend needs the PC running and the phone on the same Wi-Fi. NFC testing uses the native APK, not Expo Go.
 
 To switch back to the temporary local website:
 
@@ -109,3 +109,5 @@ In the KONEK app, open **Connect to a counter**, enter the code or scan its coun
 The permanent code never bypasses sign-in, branch access or the API key. A second phone cannot take over an occupied counter using the permanent code. Its owner/admin can disconnect the old phone, or the assigned branch manager can issue a one-use temporary replacement phone code. That explicit replacement invalidates the previous phone connection.
 
 Deploy the web update and apply `supabase/pos-counter-code-migration.sql` AFTER `pos-automatic-registration-migration.sql`. Distribute a rebuilt Android APK or your established compatible update; an already-installed binary does not get these source edits automatically. No new native module or permission is needed. See the web project’s `POS-COUNTER-SETUP.md` for the payload and rollout instructions.
+
+The custom production domain keeps the previous encrypted storage namespace so existing counter pairing, unfinished checkout references and workspace caches survive the URL change. This is local compatibility only; API traffic uses `https://konekdigital.com`. Other API hosts retain separate storage scopes.

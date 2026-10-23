@@ -27,7 +27,7 @@ test('public production APK is configured for HTTPS, release credentials and no 
   assert.equal(eas.build.production.developmentClient, false)
   assert.equal(eas.build.production.credentialsSource, 'remote')
   assert.equal(eas.build.production.android.buildType, 'apk')
-  assert.equal(eas.build.production.env.EXPO_PUBLIC_API_URL, 'https://konekdigital.vercel.app')
+  assert.equal(eas.build.production.env.EXPO_PUBLIC_API_URL, 'https://konekdigital.com')
   const app = JSON.parse(fs.readFileSync('app.json', 'utf8')).expo
   assert.equal(app.android.allowBackup, false)
   assert.ok(app.plugins.includes('./plugins/with-release-security.cjs'))

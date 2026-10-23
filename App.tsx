@@ -160,6 +160,7 @@ function AppContent() {
     return()=>{active=false;subscription.remove()}
   },[])
   const [accountOpen, setAccountOpen] = useState(false)
+  const [counterSetupRequested, setCounterSetupRequested] = useState(false)
   const [claimScannerOpen, setClaimScannerOpen] = useState(false)
   const [signingOut, setSigningOut] = useState(false)
   const signOutBusy = useRef(false)
@@ -1117,7 +1118,7 @@ function AppContent() {
               false
             }
           >
-            {screen==='dashboard'&&branchAccess?.branch_id&&<PosCheckoutConnection key={branchAccess.branch_id} branchName={branchAccess.branch_name} pairRequest={posPairRequest} onPairRequestHandled={id=>setPosPairRequest(current=>current?.id===id?null:current)} selectedId={posPurchase?.id} paused={modalIsOpen||!!requestStatus} onModalChange={setPosPairOpen} onClear={()=>{setPosPurchase(null);setPurchase('')}} onSelect={value=>{if(busy.current||modalIsOpen)return;setPosPurchase(value);setPurchase(String(value.total_paid))}}/>}
+            {branchAccess?.branch_id&&<PosCheckoutConnection setupRequested={counterSetupRequested} onSetupHandled={()=>setCounterSetupRequested(false)} showQueue={screen==='dashboard'} key={branchAccess.branch_id} branchName={branchAccess.branch_name} pairRequest={posPairRequest} onPairRequestHandled={id=>setPosPairRequest(current=>current?.id===id?null:current)} selectedId={posPurchase?.id} paused={modalIsOpen||!!requestStatus} onModalChange={setPosPairOpen} onClear={()=>{setPosPurchase(null);setPurchase('')}} onSelect={value=>{if(busy.current||modalIsOpen)return;setPosPurchase(value);setPurchase(String(value.total_paid))}}/>}
             {screen ===
               'dashboard' && (
               <Dashboard
@@ -1215,7 +1216,7 @@ function AppContent() {
         </View>
 
 
-        <AccountMenu visible={accountOpen} name={accountName} email={accountEmail}
+        <AccountMenu onConnectCounter={()=>{setAccountOpen(false);setCounterSetupRequested(true)}} visible={accountOpen} name={accountName} email={accountEmail}
           branchAccess={branchAccess} onBranchChange={id=>{void changeBranch(id)}} businessName={businessName} initials={staffInitials} signingOut={signingOut}
           onClose={() => setAccountOpen(false)} onSignOut={() => { void signOut() }} />
 
@@ -1625,96 +1626,34 @@ function Dashboard({
       </Text>
 
 
-      <View
-        style={
-          styles.quickGrid
-        }
-      >
+      <View style={styles.quickGrid}>
         <Pressable
-          style={
-            styles.quickAction
-          }
-
-          onPress={
-            onRegisterByPhone
-          }
+          accessibilityRole="button"
+          accessibilityLabel="Register customer"
+          accessibilityHint="Opens the customer registration form"
+          style={styles.quickAction}
+          onPress={onRegisterByPhone}
         >
-          <View
-            style={
-              styles.quickIcon
-            }
-          >
-            <Ionicons
-              name="person-add-outline"
-
-              size={21}
-
-              color={
-                colors.dark
-              }
-            />
+          <View style={styles.quickActionHeader}>
+            <View style={styles.quickIcon}><Ionicons name="person-add-outline" size={23} color={colors.ink} /></View>
+            <Ionicons name="chevron-forward" size={21} color={colors.ink} />
           </View>
-
-          <Text
-            style={
-              styles.quickActionTitle
-            }
-          >
-            Register customer
-          </Text>
-
-          <Text
-            style={
-              styles.quickActionDescription
-            }
-          >
-            Create a loyalty account
-            without an NFC card.
-          </Text>
+          <Text style={styles.quickActionTitle}>Register customer</Text>
+          <Text style={styles.quickActionDescription}>Add a new loyalty member.</Text>
         </Pressable>
-
-
         <Pressable
-          style={
-            styles.quickAction
-          }
-
-          onPress={
-            onPointsByPhone
-          }
+          accessibilityRole="button"
+          accessibilityLabel="Give points"
+          accessibilityHint="Opens phone number entry to give points"
+          style={styles.quickAction}
+          onPress={onPointsByPhone}
         >
-          <View
-            style={
-              styles.quickIcon
-            }
-          >
-            <Ionicons
-              name="call-outline"
-
-              size={21}
-
-              color={
-                colors.dark
-              }
-            />
+          <View style={styles.quickActionHeader}>
+            <View style={styles.quickIcon}><Ionicons name="call-outline" size={23} color={colors.ink} /></View>
+            <Ionicons name="chevron-forward" size={21} color={colors.ink} />
           </View>
-
-          <Text
-            style={
-              styles.quickActionTitle
-            }
-          >
-            Give points
-          </Text>
-
-          <Text
-            style={
-              styles.quickActionDescription
-            }
-          >
-            Verify customer using
-            phone number and PIN.
-          </Text>
+          <Text style={styles.quickActionTitle}>Give points</Text>
+          <Text style={styles.quickActionDescription}>Find a member by phone number.</Text>
         </Pressable>
       </View>
 
@@ -1904,46 +1843,44 @@ function KeyboardModalContainer({
   onClose: () => void
 }) {
   return (
-    <KeyboardAvoidingView
-      style={styles.keyboardModalBackdrop}
-      behavior={
-        Platform.OS === 'ios'
-          ? 'padding'
-          : 'height'
-      }
-      keyboardVerticalOffset={
-        Platform.OS === 'ios'
-          ? 0
-          : 10
-      }
-    >
-      <View
-        style={styles.keyboardModalCard}
+    <View style={styles.keyboardModalBackdrop}>
+      <KeyboardAvoidingView
+        style={styles.keyboardModalViewport}
+        // Keep Android forms above the keyboard even when the modal window
+        // does not resize. The full-size backdrop stays outside this view.
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={0}
       >
-        <ModalHeader
-          onClose={onClose}
-        />
-
-        <ScrollView
-          style={styles.keyboardModalScroll}
-          contentContainerStyle={
-            styles.keyboardModalScrollContent
-          }
-          keyboardShouldPersistTaps="handled"
-          keyboardDismissMode={
-            Platform.OS === 'ios'
-              ? 'interactive'
-              : 'on-drag'
-          }
-          showsVerticalScrollIndicator={false}
-          bounces={false}
-          overScrollMode="never"
-          contentInsetAdjustmentBehavior="never"
+        <View
+          style={styles.keyboardModalCard}
         >
-          {children}
-        </ScrollView>
-      </View>
-    </KeyboardAvoidingView>
+          <ModalHeader
+            onClose={onClose}
+          />
+
+          <ScrollView
+            style={styles.keyboardModalScroll}
+            contentContainerStyle={
+              styles.keyboardModalScrollContent
+            }
+            keyboardShouldPersistTaps="handled"
+            keyboardDismissMode={
+              Platform.OS === 'ios'
+                ? 'interactive'
+                : 'on-drag'
+            }
+            showsVerticalScrollIndicator={true}
+            persistentScrollbar
+            indicatorStyle="black"
+            bounces={false}
+            overScrollMode="never"
+            contentInsetAdjustmentBehavior="never"
+          >
+            {children}
+          </ScrollView>
+        </View>
+      </KeyboardAvoidingView>
+    </View>
   )
 }
 
@@ -2099,7 +2036,7 @@ function RegisterView({
       </Text>
 
       <Text style={styles.muted}>
-        {step === 'phone' ? 'Enter the phone number to check for an existing KONEK account.' : step === 'new' ? 'Create a KONEK account. This phone number and PIN can be used across participating businesses.' : source === 'nfc' ? 'This phone number already has a KONEK account. The customer must confirm their existing PIN before this NFC card can be linked.' : 'A KONEK account already exists for this phone number. Register it with this business using the same account. No PIN is needed to join, and a welcome email will be sent to the saved email address.'}
+        {step === 'phone' ? 'Enter the phone number to check for an existing KONEK account.' : step === 'new' ? 'Create a KONEK account. This phone number and PIN can be used across participating businesses.' : source === 'nfc' ? 'This phone number already has a KONEK account. The customer must confirm their existing PIN before this NFC card can be linked.' : 'A KONEK account already exists for this phone number. Register it with this business using the same account. No PIN is needed to join. The customer can view their memberships on the KONEK website.'}
       </Text>
 
       {source === 'nfc' && (
@@ -2832,9 +2769,9 @@ function CustomerDetailView({
           bounces={false}
           overScrollMode="never"
           contentInsetAdjustmentBehavior="never"
-          showsVerticalScrollIndicator={
-            false
-          }
+          showsVerticalScrollIndicator={true}
+          persistentScrollbar
+          indicatorStyle="black"
 
           contentContainerStyle={
             styles.modalScroll
@@ -4020,9 +3957,9 @@ function RewardSetupView({
           bounces={false}
           overScrollMode="never"
           contentInsetAdjustmentBehavior="never"
-          showsVerticalScrollIndicator={
-            false
-          }
+          showsVerticalScrollIndicator={true}
+          persistentScrollbar
+          indicatorStyle="black"
 
           contentContainerStyle={
             styles.modalScroll
@@ -4514,9 +4451,9 @@ function RewardConfirmationView({
           bounces={false}
           overScrollMode="never"
           contentInsetAdjustmentBehavior="never"
-          showsVerticalScrollIndicator={
-            false
-          }
+          showsVerticalScrollIndicator={true}
+          persistentScrollbar
+          indicatorStyle="black"
         >
           <CustomerHero
             customer={
@@ -6037,69 +5974,19 @@ const styles =
     },
 
     quickGrid: {
-      flexDirection:
-        'row',
-
+      flexDirection: 'row',
       gap: 10,
-
       marginBottom: 19,
     },
-
     quickAction: {
-      flex: 1,
-
-      backgroundColor:
-        colors.white,
-
-      borderWidth: 1,
-
-      borderColor:
-        colors.line,
-
-      borderRadius: 17,
-
-      padding: 14,
+      flex: 1, minWidth: 0,
+      backgroundColor: '#E5F3E5', borderWidth: 1, borderColor: '#CCE2CE',
+      borderRadius: 22, padding: 16, gap: 7,
     },
-
-    quickIcon: {
-      width: 39,
-      height: 39,
-
-      borderRadius: 12,
-
-      backgroundColor:
-        '#E7F8E9',
-
-      alignItems:
-        'center',
-
-      justifyContent:
-        'center',
-
-      marginBottom: 12,
-    },
-
-    quickActionTitle: {
-      color:
-        colors.ink,
-
-      fontSize: 13,
-
-      fontWeight:
-        '900',
-    },
-
-    quickActionDescription: {
-      color:
-        colors.muted,
-
-      fontSize: 10,
-
-      lineHeight: 15,
-
-      marginTop: 4,
-    },
-
+    quickActionHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 7 },
+    quickIcon: { width: 40, height: 40, borderRadius: 12, backgroundColor: '#3AD875', alignItems: 'center', justifyContent: 'center' },
+    quickActionTitle: { color: colors.ink, fontSize: 14, fontWeight: '900' },
+    quickActionDescription: { color: '#54665B', fontSize: 12, lineHeight: 18 },
 
     /* STATS */
 
@@ -6475,14 +6362,19 @@ const styles =
     keyboardModalBackdrop: {
       flex: 1,
 
-      justifyContent:
-        'flex-end',
-
       backgroundColor:
         'rgba(6,27,22,.50)',
     },
 
+    keyboardModalViewport: {
+      flex: 1,
+      minHeight: 0,
+      justifyContent: 'flex-end',
+    },
+
     keyboardModalCard: {
+      flexShrink: 1,
+      minHeight: 0,
       maxHeight:
         '92%',
 
@@ -6503,6 +6395,8 @@ const styles =
 
     keyboardModalScroll: {
       flexGrow: 0,
+      flexShrink: 1,
+      minHeight: 0,
     },
 
     keyboardModalScrollContent: {

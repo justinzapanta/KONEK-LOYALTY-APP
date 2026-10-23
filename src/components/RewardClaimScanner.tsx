@@ -145,7 +145,7 @@ export function RewardClaimScanner({ onClose, onComplete, onVoucher }: { onVouch
       <View style={styles.header}><View style={{ flex: 1 }}><Text style={styles.eyebrow}>CUSTOMER REWARD</Text><Text style={styles.title}>Scan & collect</Text></View>
         <Pressable accessibilityRole="button" accessibilityLabel="Close reward scanner" disabled={!!pending || nativeOpening} onPress={onClose} style={styles.close}><Ionicons name="close" size={25} color="#081711" /></Pressable>
       </View>
-      <ScrollView ref={scroll} style={styles.keyboardArea} removeClippedSubviews={false} keyboardShouldPersistTaps="handled" keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'} contentContainerStyle={styles.body}
+      <ScrollView showsVerticalScrollIndicator={true} persistentScrollbar indicatorStyle="black" ref={scroll} style={styles.keyboardArea} removeClippedSubviews={false} keyboardShouldPersistTaps="handled" keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'} contentContainerStyle={styles.body}
         onLayout={() => { if (manualEntryFocused.current) scroll.current?.scrollToEnd({ animated: true }) }}
         onContentSizeChange={() => { if (manualEntryFocused.current) scroll.current?.scrollToEnd({ animated: true }) }}>
         <Text style={styles.description}>Ask the customer to open their reward QR code in My rewards. Check the details before handing over the reward.</Text>

@@ -39,13 +39,13 @@
           "barcodeScannerEnabled": true
         }
       ],
+      "./plugins/with-release-security.cjs",
       [
         "./plugins/with-api-network.cjs",
         {
           "allowCleartext": false
         }
-      ],
-      "./plugins/with-release-security.cjs"
+      ]
     ],
     "experiments": {
       "typedRoutes": true
@@ -53,7 +53,7 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "fe0d7aa0-cb67-4209-9160-c2a36727c62e"
+        "projectId": "46486020-9af7-4511-8938-0975b5e88255"
       }
     },
     "icon": "./assets/icon.png",

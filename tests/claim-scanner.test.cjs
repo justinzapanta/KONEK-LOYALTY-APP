@@ -47,7 +47,7 @@ function harness(preview = async () => claim, fulfill = async () => ({already_us
 test('only KONEK claim QR formats are accepted; card links and random codes are rejected',()=>{
  assert.equal(codeExports.parseClaimCode(' '+code.toLowerCase()+' '),code)
  assert.equal(codeExports.parseClaimCode('KNK-'+'A'.repeat(32)),'KNK-'+'A'.repeat(32))
- for(const value of ['https://konekdigital.vercel.app/business/card','random','KNK-1234','KNK-'+'G'.repeat(32)])assert.throws(()=>codeExports.parseClaimCode(value),/not a KONEK/)
+ for(const value of ['https://konekdigital.com/business/card','random','KNK-1234','KNK-'+'G'.repeat(32)])assert.throws(()=>codeExports.parseClaimCode(value),/not a KONEK/)
 })
 test('scan previews a saved claim and requires confirmation; repeat scans and clicks are blocked',async()=>{
  const checking=deferred(),collecting=deferred(),app=harness(()=>checking.promise,()=>collecting.promise)

@@ -304,3 +304,15 @@ test('owner selects a working branch before applying a startup snapshot',async()
  });const client=h.load('src/services/api/client.ts');await client.auth.login('owner@example.com','password');const workspace=await h.load('src/services/api/loyalty.ts').loadWorkspace();
  assert.equal(workspace.branchAccess.branch_id,'main');assert.equal(workspace.customers[0].id,'main-customer');assert.equal(h.requests.length,3);assert(client.getLegacyWorkspaceStorageScope().endsWith(':owner'))
 })
+
+ test('custom domain uses the new API while preserving production counter, pending checkout and cache namespaces', async()=>{
+ const h=harness(async()=>ok({session:{...session(),user_id:'owner'}}));
+ h.environment.env.EXPO_PUBLIC_API_URL='https://konekdigital.vercel.app';
+ const client=h.load('src/services/api/client.ts');await client.auth.login('owner@example.com','password');
+ client.setWorkspaceBusinessId('business','owner');client.setWorkspaceBranchId('main',true);
+ const original=[client.getWorkspaceStorageScope(),client.getCheckoutStorageScope(),client.getLegacyWorkspaceStorageScope(),client.auth.cacheScope()];
+ h.environment.env.EXPO_PUBLIC_API_URL='https://konekdigital.com';
+ assert.deepEqual([client.getWorkspaceStorageScope(),client.getCheckoutStorageScope(),client.getLegacyWorkspaceStorageScope(),client.auth.cacheScope()],original);
+ await client.api('/api/probe');assert.equal(h.requests.at(-1).url,'https://konekdigital.com/api/probe');
+ h.environment.env.EXPO_PUBLIC_API_URL='https://other.example';assert.notEqual(client.getCheckoutStorageScope(),original[1]);
+ });
