@@ -7,7 +7,7 @@
     "scheme": "konnek",
     "userInterfaceStyle": "light",
     "android": {
-      "package": "com.konnek.loyalty",
+      "package": "com.konekdigital.loyalty",
       "softwareKeyboardLayoutMode": "resize",
       "permissions": [
         "android.permission.NFC",

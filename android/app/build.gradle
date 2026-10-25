@@ -87,9 +87,9 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace 'com.konnek.loyalty'
+    namespace 'com.konekdigital.loyalty'
     defaultConfig {
-        applicationId 'com.konnek.loyalty'
+        applicationId 'com.konekdigital.loyalty'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

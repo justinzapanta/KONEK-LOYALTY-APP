@@ -34,6 +34,14 @@
       },
       "developmentClient": false,
       "credentialsSource": "remote"
+    },
+    "play-store": {
+      "extends": "production",
+      "distribution": "store",
+      "environment": "production",
+      "android": {
+        "buildType": "app-bundle"
+      }
     }
   },
   "submit": {

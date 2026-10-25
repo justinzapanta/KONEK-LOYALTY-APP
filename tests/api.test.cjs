@@ -316,3 +316,24 @@ test('owner selects a working branch before applying a startup snapshot',async()
  await client.api('/api/probe');assert.equal(h.requests.at(-1).url,'https://konekdigital.com/api/probe');
  h.environment.env.EXPO_PUBLIC_API_URL='https://other.example';assert.notEqual(client.getCheckoutStorageScope(),original[1]);
  });
+
+
+test('forgot password works before login, sends only the normalized email, and never stores a session',async()=>{
+ const h=harness(async()=>ok({sent:true})),{auth}=h.load('src/services/api/client.ts')
+ await auth.requestPasswordReset(' STAFF@example.com ')
+ assert.equal(h.requests.length,1)
+ assert.equal(h.requests[0].url,'https://konek.test/api/auth/password-reset')
+ assert.equal(h.requests[0].body.email,'staff@example.com')
+ assert.equal(Object.keys(h.requests[0].body).length,1)
+ assert.equal(h.requests[0].headers.Authorization,undefined)
+ assert.equal(h.storage.size,0)
+ await assert.rejects(auth.requestPasswordReset('not-an-email'),/valid email/)
+ assert.equal(h.requests.length,1)
+})
+test('forgot password surfaces missing account and rate limits without creating a login session',async()=>{
+ for(const[status,message]of[[404,'No KONEK staff or dashboard account uses this email.'],[429,'Please wait before requesting another reset link.']]){
+  const h=harness(async()=>({status,json:{error:message}})),{auth}=h.load('src/services/api/client.ts')
+  await assert.rejects(auth.requestPasswordReset('staff@example.com'),e=>e.status===status&&e.message===message)
+  assert.equal(h.storage.size,0)
+ }
+})

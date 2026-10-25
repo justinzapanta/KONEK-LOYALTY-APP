@@ -1,4 +1,4 @@
-package com.konnek.loyalty
+package com.konekdigital.loyalty
 
 import android.os.Build
 import android.os.Bundle

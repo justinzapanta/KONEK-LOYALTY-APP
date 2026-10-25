@@ -1,4 +1,4 @@
-package com.konnek.loyalty
+package com.konekdigital.loyalty
 
 import android.app.Application
 import android.content.res.Configuration

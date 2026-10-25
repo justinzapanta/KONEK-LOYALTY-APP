@@ -222,3 +222,11 @@
 {"_e":"metro:instantiate","_t":1792747844821,"atlas":false,"workers":4,"host":null,"port":null}
 {"_e":"metro:bundling:started","_t":1792747852445,"id":"1","platform":"android","environment":null,"entry":"node_modules\\expo\\AppEntry.js"}
 {"_e":"metro:bundling:done","_t":1792747871024,"id":"1","total":713,"ms":18578.7054}
+{"_e":"root:init","_t":1792753937234,"format":"v0-jsonl","version":"57.0.27"}
+{"_e":"env:mode","_t":1792753941787,"nodeEnv":"production","babelEnv":"production","mode":"production"}
+{"_e":"env:load","_t":1792753941814,"mode":"production","files":["../..\\..\\.env.local"],"env":{"EXPO_PUBLIC_API_URL":"https://konekdigital.com"}}
+{"_e":"devserver:start","_t":1792753942315,"mode":"production","web":true,"baseUrl":"","asyncRoutes":false,"routerRoot":"../..\\..\\app","serverComponents":false,"serverActions":false,"serverRendering":false,"apiRoutes":false,"exporting":true}
+{"_e":"metro:config","_t":1792753946701,"serverRoot":"../..\\..","projectRoot":"../..\\..","exporting":true,"flags":{"autolinkingModuleResolution":false,"serverActions":false,"serverComponents":false,"reactCompiler":false,"optimizeGraph":false,"treeshaking":false,"logbox":false}}
+{"_e":"metro:instantiate","_t":1792753950529,"atlas":false,"workers":4,"host":null,"port":null}
+{"_e":"metro:bundling:started","_t":1792753952740,"id":"1","platform":"android","environment":null,"entry":"node_modules\\expo\\AppEntry.js"}
+{"_e":"metro:bundling:done","_t":1792753963857,"id":"1","total":713,"ms":11116.5262}

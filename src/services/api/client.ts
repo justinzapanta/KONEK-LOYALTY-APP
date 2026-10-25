@@ -77,6 +77,12 @@ async function refresh() {
   return refreshing
 }
 export const auth = {
+  async requestPasswordReset(email: string) {
+    const normalized = email.trim().toLowerCase()
+    if (normalized.length > 320 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized)) throw new Error('Enter a valid email address.')
+    const result = await send<{ sent: boolean }>('/api/auth/password-reset', { email: normalized })
+    if (result.sent !== true) throw new Error('Password recovery is temporarily unavailable. Please try again later.')
+  },
   async realtimeToken() { if (!session) throw new ApiError(401, 'Sign in to continue.'); if (session.expires_at * 1000 <= Date.now() + 60000) await refresh(); return session!.access_token },
   cacheScope() { return session?.user_id ? `${storageOrigin()}:${session.user_id}` : null },
   async bindUser(id: string) { if (session && session.user_id !== id) { session.user_id = id; await save() } },

@@ -3596,7 +3596,7 @@ function RewardCard({
           styles.rewardImage
         }
 
-        resizeMode="contain"
+        resizeMode="cover"
       />
 
 
@@ -3975,7 +3975,7 @@ function RewardSetupView({
               styles.rewardModalImage
             }
 
-            resizeMode="contain"
+            resizeMode="cover"
           />
 
 
@@ -4504,7 +4504,7 @@ function RewardConfirmationView({
               style={
                 styles.redemptionImage
               }
-              resizeMode="contain"
+              resizeMode="cover"
             />
 
             <View
@@ -5179,6 +5179,7 @@ function Login({
 }) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [forgotPassword, setForgotPassword] = useState(false)
   const [error, setError] = useState('')
   const [signingIn, setSigningIn] = useState(false)
   const signingInRef = useRef(false)
@@ -5300,6 +5301,15 @@ function Login({
               secure
             />
 
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Forgot password"
+              disabled={restoring || signingIn}
+              onPress={() => { Keyboard.dismiss(); setForgotPassword(true) }}
+              style={{ alignSelf: 'flex-end', minHeight: 44, justifyContent: 'center', paddingHorizontal: 4 }}
+            >
+              <Text style={{ color: colors.dark, fontWeight: '700', textDecorationLine: 'underline' }}>Forgot password?</Text>
+            </Pressable>
             <Button
               title={restoring ? "Signing you in…" : signingIn ? "Signing in…" : "Sign in"}
               loading={signingIn || restoring}
@@ -5313,9 +5323,61 @@ function Login({
           </ScrollView>
         </KeyboardAvoidingView>
       </SafeAreaView>
+      {forgotPassword && <ForgotPasswordModal initialEmail={email} onClose={() => { Keyboard.dismiss(); setForgotPassword(false) }} />}
       <ProfessionalAlertModal visible={!!error} title="Sign in failed" message={error} type="error" onClose={() => setError('')} />
     </SafeAreaProvider>
   )
+}
+
+
+function ForgotPasswordModal({ initialEmail, onClose }: { initialEmail: string; onClose: () => void }) {
+  const [email, setEmail] = useState(initialEmail)
+  const [sent, setSent] = useState(false)
+  const [pending, setPending] = useState(false)
+  const [error, setError] = useState('')
+  const [retryAt, setRetryAt] = useState(0)
+  const [remaining, setRemaining] = useState(0)
+  const locked = useRef(false)
+  const alive = useRef(true)
+  useEffect(() => () => { alive.current = false }, [])
+  useEffect(() => {
+    if (!retryAt) return
+    const tick = () => setRemaining(Math.max(0, Math.ceil((retryAt - Date.now()) / 1000)))
+    tick()
+    const timer = setInterval(tick, 1000)
+    return () => clearInterval(timer)
+  }, [retryAt])
+  const close = () => { if (!locked.current) onClose() }
+  const send = async () => {
+    if (locked.current || Date.now() < retryAt) return
+    locked.current = true; setPending(true); setError('')
+    try {
+      await auth.requestPasswordReset(email)
+      if (!alive.current) return
+      Keyboard.dismiss()
+      setEmail(email.trim().toLowerCase()); setSent(true); setRetryAt(Date.now() + 60_000)
+    } catch (e) {
+      if (alive.current) setError(e instanceof Error ? e.message : 'Please try again shortly.')
+    } finally {
+      locked.current = false
+      if (alive.current) setPending(false)
+    }
+  }
+  return <Modal transparent visible animationType="slide" statusBarTranslucent onRequestClose={close}>
+    <KeyboardModalContainer onClose={close}>
+      <View style={styles.phoneIcon}><Ionicons name={sent ? 'mail-open-outline' : 'lock-closed-outline'} size={27} color={colors.dark} /></View>
+      <Text style={styles.modalEyebrow}>ACCOUNT RECOVERY</Text>
+      <Text style={styles.modalTitle}>{sent ? 'Check your inbox' : 'Forgot your password?'}</Text>
+      <Text style={styles.muted}>{sent ? `We sent a reset link to ${email}. Check your spam or junk folder too. Open the email to choose a new password on konekdigital.com, then return here to sign in.` : 'Enter the email for your KONEK staff account. We’ll send a link to securely reset your password on the KONEK website.'}</Text>
+      {!sent && <Field label="Work email" placeholder="you@business.com" value={email} onChangeText={value => { if (!locked.current) setEmail(value) }} />}
+      {!!error && <Text accessibilityLiveRegion="polite" style={{ color: '#B42318', lineHeight: 22, marginTop: 12 }}>{error}</Text>}
+      <View style={{ gap: 12, marginTop: 20 }}>
+        <Button title={remaining > 0 ? `Resend link in ${remaining}s` : sent ? 'Resend reset link' : 'Send reset link'} loading={pending} disabled={pending || remaining > 0} onPress={() => void send()} />
+        {sent && <Button title="Use a different email" variant="secondary" disabled={pending} onPress={() => { setSent(false); setError('') }} />}
+        <Button title="Back to sign in" variant="secondary" disabled={pending} onPress={close} />
+      </View>
+    </KeyboardModalContainer>
+  </Modal>
 }
 
 
@@ -6229,10 +6291,14 @@ const styles =
     /* REWARD CARDS */
 
     rewardGrid: {
-      gap: 14,
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      justifyContent: 'space-between',
+      rowGap: 14,
     },
 
     rewardImageCard: {
+      width: '48%',
       overflow:
         'hidden',
 
@@ -6251,21 +6317,21 @@ const styles =
       width:
         '100%',
 
-      height: 160,
+      aspectRatio: 1,
 
       backgroundColor:
         '#E5E9E6',
     },
 
     rewardContent: {
-      padding: 15,
+      padding: 12,
     },
 
     rewardName: {
       color:
         colors.ink,
 
-      fontSize: 17,
+      fontSize: 16,
 
       fontWeight:
         '900',
@@ -6284,10 +6350,12 @@ const styles =
 
     rewardMeta: {
       flexDirection:
-        'row',
+        'column',
 
       alignItems:
-        'center',
+        'flex-start',
+
+      gap: 6,
 
       justifyContent:
         'space-between',
@@ -7213,7 +7281,7 @@ const styles =
       width:
         '100%',
 
-      height: 180,
+      aspectRatio: 4 / 3,
 
       borderRadius: 18,
 
